@@ -4,5 +4,5 @@ pages_build_output_dir = "."
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "TBD_PRODUCTION_ID"
-preview_id = "TBD_PREVIEW_ID"
+id = "1df1ad05141d49c39273dc264e83135e"
+preview_id = "cac31ca855d3447d8281a786cf4ebd9b"
