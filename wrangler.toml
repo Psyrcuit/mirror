@@ -1,0 +1,8 @@
+name = "mirror"
+compatibility_date = "2026-04-30"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "TBD_PRODUCTION_ID"
+preview_id = "TBD_PREVIEW_ID"

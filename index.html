@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mirror · personality identikit from your bookshelf</title>
+<meta name="description" content="Upload a photo of your bookshelf, desk, or workspace. Get a playful personality reading. Powered by Claude Opus 4.7 vision.">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mirror.psyrcuit.com">
+<meta property="og:title" content="Mirror · personality identikit from your bookshelf">
+<meta property="og:description" content="Upload a photo of your bookshelf, desk, or workspace. Get a playful personality reading.">
+<meta property="og:site_name" content="Mirror">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Mirror · personality identikit from your bookshelf">
+<meta name="twitter:description" content="Upload a photo. Get a playful personality reading.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+:root {
+  --violet: #8b5cf6;
+  --violet-light: #a78bfa;
+  --violet-deep: #6d28d9;
+  --violet-dim: rgba(139, 92, 246, 0.12);
+  --violet-glow: rgba(139, 92, 246, 0.4);
+  --amber: #fbbf24;
+  --green: #34d399;
+  --bg: #0a0a0c;
+  --bg-2: #14141a;
+  --text: #e8e8ee;
+  --text-2: #9898a8;
+  --text-3: #5e5e72;
+  --border: #22222a;
+  --border-2: #3a3a44;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at top, rgba(139, 92, 246, 0.08), transparent 60%),
+    var(--bg);
+}
+
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0.02em; }
+
+a { color: var(--violet-light); text-decoration: none; transition: color 0.15s ease; }
+a:hover { color: var(--text); }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+/* ─── LAYOUT ─── */
+.shell {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+}
+
+/* ─── HEADER ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 56px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-mark {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 12px var(--violet-glow), 0 0 0 2px rgba(139, 92, 246, 0.18);
+  position: relative;
+  flex-shrink: 0;
+}
+.brand-mark::after {
+  content: '';
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  animation: pulse-ring 3s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.brand-name {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+.back-link {
+  font-size: 13px;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.back-link:hover { color: var(--text-2); }
+
+/* ─── HERO ─── */
+.hero { margin-bottom: 36px; }
+.hero h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+.hero p {
+  color: var(--text-2);
+  font-size: 15px;
+  max-width: 540px;
+}
+.hero .accent { color: var(--violet-light); }
+
+/* ─── DROP ZONE ─── */
+.drop-zone {
+  border: 1.5px dashed var(--border-2);
+  border-radius: 14px;
+  padding: 56px 24px;
+  text-align: center;
+  background: rgba(255,255,255,0.01);
+  transition: all 0.18s ease;
+  cursor: pointer;
+  position: relative;
+}
+.drop-zone:hover,
+.drop-zone.dragover {
+  border-color: var(--violet);
+  background: var(--violet-dim);
+}
+.drop-zone .icon {
+  font-size: 32px;
+  margin-bottom: 14px;
+  opacity: 0.5;
+}
+.drop-zone .primary {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.drop-zone .secondary {
+  font-size: 13px;
+  color: var(--text-3);
+}
+.drop-zone input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+}
+
+/* ─── PREVIEW ─── */
+.preview {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+}
+.preview.show { display: flex; }
+.preview-frame {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 420px;
+}
+.preview-frame img {
+  max-width: 100%;
+  max-height: 420px;
+  display: block;
+  object-fit: contain;
+}
+.preview-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--violet);
+  color: white;
+}
+.btn-primary:hover { background: var(--violet-light); }
+.btn-primary:disabled {
+  background: var(--border-2);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--border-2);
+}
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── ERROR ─── */
+.error-box {
+  display: none;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  color: var(--amber);
+  font-size: 14px;
+}
+.error-box.show { display: block; }
+
+/* ─── RESULT CARD ─── */
+.result {
+  display: none;
+}
+.result.show { display: block; }
+
+.card {
+  background: linear-gradient(180deg, #14141a 0%, #0e0e14 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--violet) 50%, transparent);
+  opacity: 0.6;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.card-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-mark .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 8px var(--violet-glow);
+}
+.card-mark .label {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.005em;
+}
+.card-id {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+
+.traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.trait {
+  background: var(--violet-dim);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: var(--violet-light);
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.synthesis {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+  margin-bottom: 22px;
+}
+
+.vibe-block {
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.vibe-label {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.vibe-text {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--violet-light);
+  line-height: 1.5;
+}
+
+.card-footer {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.02em;
+}
+.card-footer .attribution { color: var(--text-3); }
+
+.result-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+/* ─── FOOTER ─── */
+.page-footer {
+  margin-top: 64px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.page-footer .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.page-footer a { color: var(--text-2); font-size: 12px; }
+
+/* ─── MOBILE ─── */
+@media (max-width: 540px) {
+  .shell { padding: 20px 18px 60px; }
+  .header { padding-bottom: 36px; }
+  .hero h1 { font-size: 24px; }
+  .drop-zone { padding: 44px 18px; }
+  .card { padding: 24px 20px; }
+  .preview-controls { flex-direction: column; align-items: stretch; }
+  .btn { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="header">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-name">Mirror</div>
+    </div>
+    <a class="back-link" href="https://psyrcuit.com/portfolio">← psyrcuit.com/portfolio</a>
+  </header>
+
+  <section class="hero">
+    <h1>Upload a photo of your bookshelf.<br>Get a personality identikit back.</h1>
+    <p>Mirror reads your environment <span class="accent">— what's on your shelves, your desk, your walls —</span> and returns a playful reading of who you might be. It's entertainment, not assessment.</p>
+  </section>
+
+  <!-- Drop zone -->
+  <div class="drop-zone" id="dropZone">
+    <div class="icon">↑</div>
+    <div class="primary">Drop a photo, or click to upload</div>
+    <div class="secondary">JPEG, PNG, or WebP · max 10MB · resized to 1568px before analysis</div>
+    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+  </div>
+
+  <!-- Preview + analyze -->
+  <div class="preview" id="preview">
+    <div class="preview-frame">
+      <img id="previewImg" alt="Your uploaded photo">
+    </div>
+    <div class="preview-controls">
+      <button class="btn btn-primary" id="analyzeBtn">
+        <span id="analyzeLabel">Analyze</span>
+      </button>
+      <button class="btn btn-ghost" id="resetBtn">Pick a different photo</button>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Result -->
+  <div class="result" id="result">
+    <div class="card" id="resultCard">
+      <div class="card-header">
+        <div class="card-mark">
+          <div class="dot"></div>
+          <div class="label">Mirror reading</div>
+        </div>
+        <div class="card-id mono" id="cardId"></div>
+      </div>
+
+      <div class="traits" id="traits"></div>
+
+      <div class="synthesis" id="synthesis"></div>
+
+      <div class="vibe-block">
+        <div class="vibe-label mono">Vibe</div>
+        <div class="vibe-text" id="vibe"></div>
+      </div>
+
+      <div class="card-footer">
+        <span class="attribution mono">mirror.psyrcuit.com</span>
+        <span class="mono" id="cardDate"></span>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" id="exportBtn">Save as PNG</button>
+      <button class="btn btn-ghost" id="newBtn">Try another photo</button>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>Your image isn't stored. <a href="https://github.com/psyrcuit/mirror#privacy">Privacy</a>.</span>
+      <span>Limit: 5 / hour per visitor, 40 / day total.</span>
+    </div>
+    <div class="row">
+      <a href="https://github.com/psyrcuit/mirror">GitHub</a>
+      <a href="https://psyrcuit.com/portfolio">Part of psyrcuit.com/portfolio</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const MAX_LONG_EDGE = 1568;
+  const MAX_BODY_BYTES = 2 * 1024 * 1024; // 2MB
+  const MAX_INPUT_BYTES = 10 * 1024 * 1024; // 10MB raw input cap (pre-resize)
+  const JPEG_QUALITY = 0.85;
+
+  // ── DOM refs ──
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const preview = document.getElementById('preview');
+  const previewImg = document.getElementById('previewImg');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const analyzeLabel = document.getElementById('analyzeLabel');
+  const resetBtn = document.getElementById('resetBtn');
+  const errorBox = document.getElementById('errorBox');
+  const result = document.getElementById('result');
+  const resultCard = document.getElementById('resultCard');
+  const traitsEl = document.getElementById('traits');
+  const synthesisEl = document.getElementById('synthesis');
+  const vibeEl = document.getElementById('vibe');
+  const cardId = document.getElementById('cardId');
+  const cardDate = document.getElementById('cardDate');
+  const exportBtn = document.getElementById('exportBtn');
+  const newBtn = document.getElementById('newBtn');
+
+  let resizedBlob = null;
+  let resizedMimeType = null;
+
+  // ── Helpers ──
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add('show');
+  }
+  function clearError() { errorBox.classList.remove('show'); }
+
+  function showSection(name) {
+    dropZone.style.display = name === 'idle' ? '' : 'none';
+    preview.classList.toggle('show', name === 'preview' || name === 'analyzing');
+    result.classList.toggle('show', name === 'result');
+  }
+
+  function setAnalyzing(isAnalyzing) {
+    analyzeBtn.disabled = isAnalyzing;
+    if (isAnalyzing) {
+      analyzeLabel.textContent = 'Reading…';
+      const spinner = document.createElement('span');
+      spinner.className = 'spinner';
+      analyzeBtn.prepend(spinner);
+    } else {
+      analyzeLabel.textContent = 'Analyze';
+      const sp = analyzeBtn.querySelector('.spinner');
+      if (sp) sp.remove();
+    }
+  }
+
+  // ── File handling ──
+  function handleFile(file) {
+    clearError();
+    if (!file) return;
+    if (!/^image\/(jpeg|jpg|png|webp)$/i.test(file.type)) {
+      showError('Image type not supported. Use JPEG, PNG, or WebP.');
+      return;
+    }
+    if (file.size > MAX_INPUT_BYTES) {
+      showError('That file is over 10MB. Try a smaller one.');
+      return;
+    }
+    resizeAndPreview(file);
+  }
+
+  function resizeAndPreview(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const { width, height } = img;
+        let targetW = width, targetH = height;
+        const longEdge = Math.max(width, height);
+        if (longEdge > MAX_LONG_EDGE) {
+          const scale = MAX_LONG_EDGE / longEdge;
+          targetW = Math.round(width * scale);
+          targetH = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+
+        // Always emit JPEG for size predictability
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            showError('Could not process that image. Try another.');
+            return;
+          }
+          if (blob.size > MAX_BODY_BYTES) {
+            showError('Image is still over 2MB after compression. Try a smaller or simpler photo.');
+            return;
+          }
+          resizedBlob = blob;
+          resizedMimeType = 'image/jpeg';
+          previewImg.src = URL.createObjectURL(blob);
+          showSection('preview');
+        }, 'image/jpeg', JPEG_QUALITY);
+      };
+      img.onerror = () => showError('Could not load that image.');
+      img.src = e.target.result;
+    };
+    reader.onerror = () => showError('Could not read that file.');
+    reader.readAsDataURL(file);
+  }
+
+  function reset() {
+    clearError();
+    resizedBlob = null;
+    resizedMimeType = null;
+    fileInput.value = '';
+    previewImg.src = '';
+    showSection('idle');
+  }
+
+  // ── Drag-drop ──
+  ['dragenter', 'dragover'].forEach((ev) => {
+    dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach((ev) => {
+    dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+    });
+  });
+  dropZone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) handleFile(file);
+  });
+
+  resetBtn.addEventListener('click', reset);
+  newBtn.addEventListener('click', reset);
+
+  // ── Analyze ──
+  async function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function analyze() {
+    if (!resizedBlob) return;
+    clearError();
+    setAnalyzing(true);
+    try {
+      const image_base64 = await blobToBase64(resizedBlob);
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_base64, mime_type: resizedMimeType }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 429) {
+        showError(data.error || 'You\'ve used your hourly limit. Try again in a bit.');
+        return;
+      }
+      if (res.status === 503) {
+        showError(data.error || 'Demo paused for the day, resets midnight UTC. Come back tomorrow.');
+        return;
+      }
+      if (!res.ok) {
+        showError(data.error || 'Something broke on our end. Try again in a moment.');
+        return;
+      }
+
+      renderResult(data);
+    } catch (err) {
+      showError('Network hiccup. Check your connection and try again.');
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+  analyzeBtn.addEventListener('click', analyze);
+
+  // ── Render ──
+  function renderResult(data) {
+    if (!data || !Array.isArray(data.traits) || !data.synthesis || !data.vibe) {
+      showError('Got a malformed response. Try again.');
+      return;
+    }
+    traitsEl.innerHTML = '';
+    data.traits.forEach((t) => {
+      const chip = document.createElement('span');
+      chip.className = 'trait';
+      chip.textContent = t;
+      traitsEl.appendChild(chip);
+    });
+    synthesisEl.textContent = data.synthesis;
+    vibeEl.textContent = data.vibe;
+
+    const now = new Date();
+    cardId.textContent = '#' + Math.random().toString(36).slice(2, 8).toUpperCase();
+    cardDate.textContent = now.toISOString().slice(0, 10);
+
+    showSection('result');
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── PNG export ──
+  exportBtn.addEventListener('click', async () => {
+    if (typeof html2canvas !== 'function') {
+      showError('Export library failed to load. Try refreshing.');
+      return;
+    }
+    exportBtn.disabled = true;
+    const originalText = exportBtn.textContent;
+    exportBtn.textContent = 'Rendering…';
+    try {
+      const canvas = await html2canvas(resultCard, {
+        backgroundColor: '#0a0a0c',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+      });
+      const link = document.createElement('a');
+      link.download = 'mirror-reading.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      showError('Could not generate PNG. Screenshot the card manually.');
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = originalText;
+    }
+  });
+
+  // Initial state
+  showSection('idle');
+})();
+</script>
+
+</body>
+</html>
