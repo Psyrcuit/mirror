@@ -20,21 +20,23 @@ Built as Build 1 of 7 in a 90-day public AI demo portfolio focused on AI legibil
 
 ## How to run it locally
 
+The project is pure static HTML + a single Cloudflare Pages Function — no build step, no `package.json`, no bundler.
+
 ```bash
 git clone https://github.com/psyrcuit/mirror
 cd mirror
-npm install
 cp .dev.vars.example .dev.vars
 # Add your ANTHROPIC_API_KEY and OPENAI_API_KEY to .dev.vars
-npx wrangler pages dev .
+npx wrangler@latest pages dev .
 # Open http://localhost:8788
 ```
 
+`npx wrangler` will fetch a one-shot copy of Wrangler at run time — nothing gets installed into the repo. If you don't want any Node tooling at all, you can deploy the repo to Cloudflare Pages via the Git integration and skip the local dev server entirely.
+
 You'll need:
-- Node.js 20+
 - An Anthropic API key (for the primary vision call)
 - An OpenAI API key (for the fallback path)
-- Wrangler CLI (`npm install -g wrangler`, or use `npx`)
+- Node.js (only if you want `npx wrangler` for local dev — not required for deploy)
 
 ## Architecture (one-line summary)
 
@@ -47,7 +49,7 @@ Single static HTML page served from Cloudflare Pages. Browser uploads image, hit
 - **Anglocentric bias.** The vision model recognizes Western book covers and aesthetic markers more reliably than non-Western ones. Working on it.
 - **Single-language output.** English only in v1.
 - **Rate limited per IP.** 5 requests per IP per hour. If the demo is getting hammered, you'll see a 429.
-- **Globally rate limited.** Total 40 requests/day across all visitors. If the daily cap is hit, the demo returns a friendly 503 until midnight UTC. Cost discipline > availability for a demo.
+- **Globally rate limited.** Total 100 requests/day across all visitors. If the daily cap is hit, the demo returns a friendly 503 until midnight UTC. Cost discipline > availability for a demo.
 - **No image storage.** This is intentional (privacy), but it means there's no "share this specific reading" URL — you have to screenshot/PNG-export the card to share.
 - **Costs money to run.** Each call hits the Anthropic API. Self-hosting will burn through your API credits if you make Mirror public without rate limits in place. The daily cap protects you from runaway spend; don't disable it without thinking through the consequences.
 
@@ -64,7 +66,7 @@ Single static HTML page served from Cloudflare Pages. Browser uploads image, hit
 - Cloudflare Pages: free (unlimited bandwidth, unlimited static-asset requests)
 - Cloudflare Workers KV: free at this scale (well under the 100k reads/day, 1k writes/day free tier)
 - Custom subdomain via Cloudflare DNS: free if you already have a domain on Cloudflare
-- API spend: bounded by your daily cap configuration. Default is 40 Opus 4.7 calls/day at ~$0.024/call = $0.96/day max. Adjust in `functions/api/analyze.js` if you want a different ceiling.
+- API spend: bounded by your daily cap configuration. Default is 100 Opus 4.7 calls/day at ~$0.024/call ≈ $2.40/day max (worst case ~$4.80 if every call also triggers the strict-retry path). Adjust `DAILY_CAP` in `functions/api/analyze.js` if you want a different ceiling.
 
 Total fixed cost: $0/month plus your API spend.
 
