@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  <defs>
+    <radialGradient id="topGlow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#14141a"/>
+      <stop offset="100%" stop-color="#0e0e14"/>
+    </linearGradient>
+    <linearGradient id="topLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="1200" fill="#0a0a0c"/>
+  <rect width="1200" height="1200" fill="url(#topGlow)"/>
+
+  <g transform="translate(100, 130)">
+    <circle cx="14" cy="14" r="10" fill="#8b5cf6"/>
+    <circle cx="14" cy="14" r="20" fill="none" stroke="#8b5cf6" stroke-opacity="0.3" stroke-width="1.5"/>
+    <text x="48" y="24" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="600" font-size="32" fill="#e8e8ee">Mirror</text>
+  </g>
+
+  <text font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="500" font-size="48" fill="#e8e8ee" letter-spacing="-1.5">
+    <tspan x="100" y="260">Personality identikit</tspan>
+    <tspan x="100" y="320">from your bookshelf.</tspan>
+  </text>
+
+  <text x="100" y="380" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="22" fill="#9898a8">
+    Upload an image of your desk or bookshelf —
+  </text>
+  <text x="100" y="412" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="22" fill="#9898a8">
+    get a playful reading back. Powered by Claude Opus 4.7.
+  </text>
+
+  <g transform="translate(100, 480)">
+    <rect width="1000" height="540" rx="20" fill="url(#cardBg)" stroke="#22222a" stroke-width="1"/>
+    <rect width="1000" height="2" fill="url(#topLine)"/>
+
+    <g transform="translate(40, 50)">
+      <circle cx="6" cy="10" r="6" fill="#8b5cf6"/>
+      <text x="22" y="16" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="18" fill="#e8e8ee">Mirror reading</text>
+      <text x="920" y="16" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#5e5e72">#A4B2C0</text>
+    </g>
+
+    <rect x="40" y="100" width="920" height="1" fill="#22222a"/>
+
+    <g transform="translate(40, 130)">
+      <g>
+        <rect width="200" height="40" rx="20" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.25)"/>
+        <text x="100" y="26" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="500" fill="#a78bfa">curated chaos</text>
+      </g>
+      <g transform="translate(216, 0)">
+        <rect width="260" height="40" rx="20" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.25)"/>
+        <text x="130" y="26" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="500" fill="#a78bfa">analytical romantic</text>
+      </g>
+      <g transform="translate(492, 0)">
+        <rect width="220" height="40" rx="20" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.25)"/>
+        <text x="110" y="26" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="500" fill="#a78bfa">weekend archivist</text>
+      </g>
+      <g transform="translate(728, 0)">
+        <rect width="200" height="40" rx="20" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.25)"/>
+        <text x="100" y="26" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="500" fill="#a78bfa">tea over coffee</text>
+      </g>
+    </g>
+
+    <text font-family="Inter, system-ui, -apple-system, sans-serif" font-size="18" fill="#e8e8ee">
+      <tspan x="40" y="240">Books shelved by mood not Dewey, three notebooks in</tspan>
+      <tspan x="40" y="270">active use, the careful kind of disorder that means</tspan>
+      <tspan x="40" y="300">somebody actually thinks here.</tspan>
+    </text>
+
+    <rect x="40" y="350" width="920" height="1" fill="#22222a"/>
+
+    <g transform="translate(40, 380)">
+      <text font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#5e5e72" letter-spacing="2">VIBE</text>
+      <text x="60" y="0" font-family="Inter, system-ui, sans-serif" font-size="16" font-style="italic" fill="#a78bfa">thoughtful clutter; quiet joy</text>
+    </g>
+
+    <rect x="40" y="450" width="920" height="1" fill="#22222a"/>
+    <g transform="translate(40, 490)">
+      <text font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#5e5e72">mirror.psyrcuit.com</text>
+      <text x="920" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#5e5e72">#mirror</text>
+    </g>
+  </g>
+
+  <text x="600" y="1140" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20" fill="#9898a8">mirror.psyrcuit.com</text>
+</svg>

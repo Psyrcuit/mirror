@@ -9,12 +9,18 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mirror.psyrcuit.com">
 <meta property="og:title" content="Mirror · personality identikit from your bookshelf">
-<meta property="og:description" content="Upload a photo of your bookshelf, desk, or workspace. Get a playful personality reading.">
+<meta property="og:description" content="Upload an image of your desk or bookshelf. Get a playful personality reading back.">
 <meta property="og:site_name" content="Mirror">
+<meta property="og:image" content="https://mirror.psyrcuit.com/og.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta property="og:image:alt" content="Mirror — personality identikit from an image of your desk or bookshelf">
 
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Mirror · personality identikit from your bookshelf">
-<meta name="twitter:description" content="Upload a photo. Get a playful personality reading.">
+<meta name="twitter:description" content="Upload an image of your desk or bookshelf. Get a playful personality reading back.">
+<meta name="twitter:image" content="https://mirror.psyrcuit.com/og.svg">
+<meta name="twitter:image:alt" content="Mirror — personality identikit from an image of your desk or bookshelf">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -371,6 +377,85 @@ button {
   margin-top: 20px;
   flex-wrap: wrap;
 }
+.share-status {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-3);
+  min-height: 16px;
+  letter-spacing: 0.02em;
+}
+.share-status.show { color: var(--violet-light); }
+
+/* ─── SHARE MODAL ─── */
+.share-modal {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: fade-in 0.15s ease;
+}
+.share-modal[hidden] { display: none; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.share-modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.7);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.share-modal-panel {
+  position: relative;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 22px 18px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+}
+.share-modal-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.share-modal-title { font-weight: 600; font-size: 16px; letter-spacing: -0.01em; }
+.share-modal-close {
+  font-size: 20px; line-height: 1;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  color: var(--text-3);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.share-modal-close:hover { color: var(--text); background: var(--border); }
+.share-modal-hint {
+  font-size: 12px; color: var(--text-3);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.share-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.share-modal-grid button {
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+.share-modal-grid button:hover {
+  background: var(--violet-dim);
+  border-color: rgba(139,92,246,0.4);
+  color: var(--violet-light);
+}
+.share-modal-grid button:disabled {
+  opacity: 0.5; cursor: not-allowed;
+}
+@media (max-width: 480px) {
+  .share-modal-grid { grid-template-columns: 1fr; }
+}
 
 /* ─── FOOTER ─── */
 .page-footer {
@@ -470,8 +555,34 @@ button {
     </div>
 
     <div class="result-actions">
-      <button class="btn btn-primary" id="exportBtn">Save as PNG</button>
+      <button class="btn btn-primary" id="shareBtn">Share</button>
+      <button class="btn btn-ghost" id="exportBtn">Save as PNG</button>
       <button class="btn btn-ghost" id="newBtn">Try another photo</button>
+    </div>
+    <div class="share-status" id="shareStatus" aria-live="polite"></div>
+  </div>
+
+  <!-- Share modal -->
+  <div class="share-modal" id="shareModal" hidden>
+    <div class="share-modal-backdrop" id="shareModalBackdrop"></div>
+    <div class="share-modal-panel" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+      <div class="share-modal-head">
+        <div class="share-modal-title" id="shareModalTitle">Share your reading</div>
+        <button class="share-modal-close" id="shareModalClose" aria-label="Close">×</button>
+      </div>
+      <div class="share-modal-hint">Most platforms can't auto-attach images — we'll save the PNG when you pick one so you can drop it into the post.</div>
+      <div class="share-modal-grid" id="shareModalGrid">
+        <button data-share="native">Native share</button>
+        <button data-share="x">X / Twitter</button>
+        <button data-share="bluesky">Bluesky</button>
+        <button data-share="threads">Threads</button>
+        <button data-share="linkedin">LinkedIn</button>
+        <button data-share="reddit">Reddit</button>
+        <button data-share="facebook">Facebook</button>
+        <button data-share="email">Email</button>
+        <button data-share="copy">Copy link</button>
+        <button data-share="download">Save PNG only</button>
+      </div>
     </div>
   </div>
 
@@ -481,8 +592,9 @@ button {
       <span>Limit: 5 / hour per visitor, 40 / day total.</span>
     </div>
     <div class="row">
+      <a href="https://psyrcuit.com/portfolio">About this demo →</a>
+      <a href="https://ko-fi.com/psyrcuit">Support on Ko-fi ☕</a>
       <a href="https://github.com/psyrcuit/mirror">GitHub</a>
-      <a href="https://psyrcuit.com/portfolio">Part of psyrcuit.com/portfolio</a>
     </div>
   </footer>
 
@@ -514,6 +626,8 @@ button {
   const cardId = document.getElementById('cardId');
   const cardDate = document.getElementById('cardDate');
   const exportBtn = document.getElementById('exportBtn');
+  const shareBtn = document.getElementById('shareBtn');
+  const shareStatus = document.getElementById('shareStatus');
   const newBtn = document.getElementById('newBtn');
 
   let resizedBlob = null;
@@ -711,31 +825,191 @@ button {
     result.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ── PNG export ──
-  exportBtn.addEventListener('click', async () => {
+  // ── PNG render (square) ──
+  async function renderSquarePNG() {
     if (typeof html2canvas !== 'function') {
-      showError('Export library failed to load. Try refreshing.');
-      return;
+      throw new Error('Export library failed to load. Try refreshing.');
     }
+    const cardCanvas = await html2canvas(resultCard, {
+      backgroundColor: null,
+      scale: 2,
+      logging: false,
+      useCORS: true,
+    });
+    const padding = 80 * 2;
+    const size = Math.max(cardCanvas.width, cardCanvas.height) + padding;
+    const sq = document.createElement('canvas');
+    sq.width = size;
+    sq.height = size;
+    const ctx = sq.getContext('2d');
+    ctx.fillStyle = '#0a0a0c';
+    ctx.fillRect(0, 0, size, size);
+    const grad = ctx.createRadialGradient(size / 2, size * 0.15, 0, size / 2, size * 0.15, size * 0.7);
+    grad.addColorStop(0, 'rgba(139, 92, 246, 0.12)');
+    grad.addColorStop(1, 'rgba(139, 92, 246, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    ctx.drawImage(cardCanvas, (size - cardCanvas.width) / 2, (size - cardCanvas.height) / 2);
+    return sq;
+  }
+
+  function setShareStatus(msg) {
+    shareStatus.textContent = msg || '';
+    shareStatus.classList.toggle('show', !!msg);
+    if (msg) setTimeout(() => { if (shareStatus.textContent === msg) setShareStatus(''); }, 4000);
+  }
+
+  exportBtn.addEventListener('click', async () => {
     exportBtn.disabled = true;
     const originalText = exportBtn.textContent;
     exportBtn.textContent = 'Rendering…';
     try {
-      const canvas = await html2canvas(resultCard, {
-        backgroundColor: '#0a0a0c',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-      });
+      const sq = await renderSquarePNG();
       const link = document.createElement('a');
       link.download = 'mirror-reading.png';
-      link.href = canvas.toDataURL('image/png');
+      link.href = sq.toDataURL('image/png');
       link.click();
     } catch (err) {
-      showError('Could not generate PNG. Screenshot the card manually.');
+      showError(err.message || 'Could not generate PNG. Screenshot the card manually.');
     } finally {
       exportBtn.disabled = false;
       exportBtn.textContent = originalText;
+    }
+  });
+
+  // ── Share widget ──
+  const SHARE_URL = 'https://mirror.psyrcuit.com';
+  const SHARE_TITLE = 'My Mirror reading';
+  const SHARE_TEXT = 'A personality identikit from an image of my desk/bookshelf, via Mirror.';
+
+  const shareModal = document.getElementById('shareModal');
+  const shareModalBackdrop = document.getElementById('shareModalBackdrop');
+  const shareModalClose = document.getElementById('shareModalClose');
+  const shareModalGrid = document.getElementById('shareModalGrid');
+
+  let cachedShareBlob = null;
+  let cachedShareDataUrl = null;
+
+  function openShareModal() {
+    const nativeBtn = shareModalGrid.querySelector('[data-share="native"]');
+    if (nativeBtn) nativeBtn.style.display = (typeof navigator.share === 'function') ? '' : 'none';
+    shareModal.hidden = false;
+  }
+  function closeShareModal() { shareModal.hidden = true; }
+
+  shareModalClose.addEventListener('click', closeShareModal);
+  shareModalBackdrop.addEventListener('click', closeShareModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !shareModal.hidden) closeShareModal();
+  });
+
+  function downloadCachedPNG() {
+    if (!cachedShareDataUrl) return;
+    const link = document.createElement('a');
+    link.download = 'mirror-reading.png';
+    link.href = cachedShareDataUrl;
+    link.click();
+  }
+
+  function openIntent(url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  shareBtn.addEventListener('click', async () => {
+    shareBtn.disabled = true;
+    const originalText = shareBtn.textContent;
+    shareBtn.textContent = 'Preparing…';
+    try {
+      const sq = await renderSquarePNG();
+      cachedShareBlob = await new Promise((resolve) => sq.toBlob(resolve, 'image/png'));
+      cachedShareDataUrl = sq.toDataURL('image/png');
+      if (!cachedShareBlob) throw new Error('Could not generate share image.');
+      openShareModal();
+    } catch (err) {
+      showError(err.message || 'Could not prepare share image. Try Save as PNG.');
+    } finally {
+      shareBtn.disabled = false;
+      shareBtn.textContent = originalText;
+    }
+  });
+
+  shareModalGrid.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-share]');
+    if (!btn) return;
+    const action = btn.dataset.share;
+    const enc = encodeURIComponent;
+
+    try {
+      switch (action) {
+        case 'native': {
+          const file = cachedShareBlob && new File([cachedShareBlob], 'mirror-reading.png', { type: 'image/png' });
+          const withFile = file && navigator.canShare && navigator.canShare({ files: [file], title: SHARE_TITLE, text: SHARE_TEXT, url: SHARE_URL });
+          const data = withFile
+            ? { files: [file], title: SHARE_TITLE, text: SHARE_TEXT, url: SHARE_URL }
+            : { title: SHARE_TITLE, text: SHARE_TEXT, url: SHARE_URL };
+          await navigator.share(data);
+          setShareStatus('Shared.');
+          closeShareModal();
+          break;
+        }
+        case 'x':
+          downloadCachedPNG();
+          openIntent(`https://twitter.com/intent/tweet?text=${enc(SHARE_TEXT)}&url=${enc(SHARE_URL)}`);
+          setShareStatus('PNG saved — attach it in the post.');
+          closeShareModal();
+          break;
+        case 'bluesky':
+          downloadCachedPNG();
+          openIntent(`https://bsky.app/intent/compose?text=${enc(SHARE_TEXT + ' ' + SHARE_URL)}`);
+          setShareStatus('PNG saved — attach it in the post.');
+          closeShareModal();
+          break;
+        case 'threads':
+          downloadCachedPNG();
+          openIntent(`https://www.threads.net/intent/post?text=${enc(SHARE_TEXT + ' ' + SHARE_URL)}`);
+          setShareStatus('PNG saved — attach it in the post.');
+          closeShareModal();
+          break;
+        case 'linkedin':
+          downloadCachedPNG();
+          openIntent(`https://www.linkedin.com/sharing/share-offsite/?url=${enc(SHARE_URL)}`);
+          setShareStatus('PNG saved — attach it in the post.');
+          closeShareModal();
+          break;
+        case 'reddit':
+          downloadCachedPNG();
+          openIntent(`https://www.reddit.com/submit?url=${enc(SHARE_URL)}&title=${enc(SHARE_TITLE)}`);
+          setShareStatus('PNG saved — attach it in the post.');
+          closeShareModal();
+          break;
+        case 'facebook':
+          downloadCachedPNG();
+          openIntent(`https://www.facebook.com/sharer/sharer.php?u=${enc(SHARE_URL)}`);
+          setShareStatus('PNG saved — attach it in the post.');
+          closeShareModal();
+          break;
+        case 'email':
+          window.location.href = `mailto:?subject=${enc(SHARE_TITLE)}&body=${enc(SHARE_TEXT + '\n\n' + SHARE_URL)}`;
+          closeShareModal();
+          break;
+        case 'copy':
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(SHARE_URL);
+            setShareStatus('Link copied.');
+          } else {
+            showError('Clipboard not available. Copy from the address bar.');
+          }
+          closeShareModal();
+          break;
+        case 'download':
+          downloadCachedPNG();
+          setShareStatus('PNG saved.');
+          closeShareModal();
+          break;
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+      showError(err.message || 'Share action failed. Try a different option.');
     }
   });
 

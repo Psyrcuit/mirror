@@ -136,10 +136,7 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Reading came back malformed. Try a different photo.' }, 502);
   }
 
-  // 8. Post-process: strip likely real-person names as belt-and-suspenders defense
-  const cleaned = stripPotentialNames(validated);
-
-  return jsonResponse(cleaned, 200);
+  return jsonResponse(validated, 200);
 }
 
 // ────────────────────────────────────────────────────────────
@@ -266,15 +263,6 @@ function parseAndValidate(raw) {
     traits: parsed.traits.map((t) => t.trim()),
     synthesis: parsed.synthesis.trim(),
     vibe: parsed.vibe.trim(),
-  };
-}
-
-const NAME_PATTERN = /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g;
-function stripPotentialNames(obj) {
-  return {
-    traits: obj.traits.map((t) => t.replace(NAME_PATTERN, '[name redacted]')),
-    synthesis: obj.synthesis.replace(NAME_PATTERN, '[name redacted]'),
-    vibe: obj.vibe.replace(NAME_PATTERN, '[name redacted]'),
   };
 }
 
