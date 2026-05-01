@@ -1,12 +1,54 @@
-"""Generate og.png from scratch using PIL + Windows system fonts.
+"""Generate og.png + apple-touch-icon.png using PIL + system fonts +
+headless Chrome for the brand logo (libcairo isn't available on Windows
+ARM64 so cairosvg/svglib both fail).
 
 Run from the repo root: `python gen_og.py`
-Outputs og.png (1200x1200) matching mirror.psyrcuit.com's brand.
+Outputs og.png (1200x1200) and apple-touch-icon.png (180x180).
 
-Design priority: text must read at thumbnail size (~250px wide). That means
-short copy, very large fonts, no detail-card mockup.
+Design priority: text must read at thumbnail size (~250px wide).
 """
+import io, os, subprocess, tempfile
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+LOGO_SVG = "favicon.svg"
+CHROME = r"C:/Program Files/Google/Chrome/Application/chrome.exe"
+
+
+def render_logo(size_px):
+    """Rasterize favicon.svg to a transparent-bg PNG via headless Chrome.
+
+    Chrome headless has a minimum window size and produces blank output
+    below ~~~150px. Always render at 1024px then downscale via PIL Lanczos.
+    """
+    SOURCE = 1024
+    here = os.path.abspath(".").replace("\\", "/")
+    with tempfile.TemporaryDirectory() as td:
+        td_fwd = td.replace("\\", "/")
+        html = (
+            "<!doctype html><html><head><style>"
+            "html,body{margin:0;padding:0;background:transparent;}"
+            "body{display:flex;justify-content:center;align-items:center;"
+            "width:100vw;height:100vh;}"
+            "img{width:100vmin;height:100vmin;display:block;}"
+            "</style></head><body>"
+            f'<img src="file:///{here}/{LOGO_SVG}" alt="">'
+            "</body></html>"
+        )
+        html_path = f"{td_fwd}/render.html"
+        out_path = f"{td_fwd}/out.png"
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(html)
+        subprocess.run([
+            CHROME, "--headless", "--disable-gpu", "--hide-scrollbars",
+            "--default-background-color=00000000",
+            f"--screenshot={out_path}",
+            f"--window-size={SOURCE},{SOURCE}",
+            f"file:///{html_path}",
+        ], check=True, capture_output=True)
+        big = Image.open(out_path).convert("RGBA").copy()
+    if size_px == SOURCE:
+        return big
+    return big.resize((size_px, size_px), Image.LANCZOS)
 
 W = H = 1200
 BG = (10, 10, 12)
@@ -40,37 +82,28 @@ draw = ImageDraw.Draw(img)
 
 # ── BRAND ROW (top-centered) ─────────────────────────────
 brand_text = "Mirror"
-brand_font = font("segoeuib.ttf", 56)
+brand_font = font("segoeuib.ttf", 84)
 b_bbox = draw.textbbox((0, 0), brand_text, font=brand_font)
 b_w = b_bbox[2] - b_bbox[0]
-b_h = b_bbox[3] - b_bbox[1]
-dot_size = 36
-gap = 24
-total_w = dot_size + gap + b_w
+logo_size = 120
+gap = 28
+total_w = logo_size + gap + b_w
 start_x = (W - total_w) // 2
-brand_y = 130
+brand_y = 110
 
-# Outer ring
-ring = Image.new("RGBA", (dot_size + 24, dot_size + 24), (0, 0, 0, 0))
-ImageDraw.Draw(ring).ellipse(
-    [2, 2, dot_size + 22, dot_size + 22],
-    outline=(*VIOLET, 90), width=2
-)
-img.paste(ring, (start_x - 12, brand_y - 12 + 12), ring)
-# Solid violet dot
-draw.ellipse(
-    [start_x, brand_y + 12, start_x + dot_size, brand_y + 12 + dot_size],
-    fill=VIOLET,
-)
-# Wordmark
-draw.text((start_x + dot_size + gap, brand_y), brand_text,
+logo_img = render_logo(logo_size)
+img_rgba = img.convert("RGBA")
+img_rgba.alpha_composite(logo_img, (start_x, brand_y))
+img = img_rgba.convert("RGB")
+draw = ImageDraw.Draw(img)
+draw.text((start_x + logo_size + gap, brand_y + 22), brand_text,
           fill=TEXT, font=brand_font)
 
-# ── HEADLINE (massive, centered, 3 lines) ────────────────
-head_font = font("segoeuib.ttf", 124)
-head_lines = ["What your", "bookshelf", "says about you."]
-head_y = 280
-line_h = 132
+# ── HEADLINE (massive, centered) ─────────────────────────
+head_font = font("segoeuib.ttf", 96)
+head_lines = ["What does your", "desk/bookshelf", "say about you?"]
+head_y = 290
+line_h = 110
 for i, line in enumerate(head_lines):
     bbox = draw.textbbox((0, 0), line, font=head_font)
     lw = bbox[2] - bbox[0]
@@ -78,16 +111,16 @@ for i, line in enumerate(head_lines):
               fill=TEXT, font=head_font)
 
 # ── TRAIT CHIPS (big, centered, two-row) ─────────────────
-chips_font = font("segoeui.ttf", 32)
+chips_font = font("segoeui.ttf", 42)
 chips = ["curated chaos", "analytical romantic",
          "weekend archivist", "tea over coffee"]
 chip_color = (28, 22, 48)
 chip_border = (110, 80, 200)
-chip_pad_x = 32
-chip_h = 64
-chip_gap = 16
+chip_pad_x = 38
+chip_h = 84
+chip_gap = 18
 
-chips_y = 800
+chips_y = 770
 
 # Greedy two-row packing, each row centered
 def measure(text):
@@ -109,21 +142,31 @@ for c, w in zip(chips, widths):
 for ri, row in enumerate(rows):
     total = sum(w for _, w in row) + chip_gap * (len(row) - 1)
     cx_pos = (W - total) // 2
-    cy_pos = chips_y + ri * (chip_h + 16)
+    cy_pos = chips_y + ri * (chip_h + 20)
     for label, w in row:
         draw.rounded_rectangle(
             [cx_pos, cy_pos, cx_pos + w, cy_pos + chip_h],
             radius=chip_h // 2,
-            fill=chip_color, outline=chip_border, width=2,
+            fill=chip_color, outline=chip_border, width=3,
         )
         draw.text((cx_pos + w // 2, cy_pos + chip_h // 2 - 2), label,
                   fill=VIOLET_LIGHT, font=chips_font, anchor="mm")
         cx_pos += w + chip_gap
 
 # ── BOTTOM URL (big, centered) ───────────────────────────
-url_font = font("consola.ttf", 38)
-draw.text((W // 2, H - 90), "mirror.psyrcuit.com",
+url_font = font("consola.ttf", 56)
+draw.text((W // 2, H - 100), "mirror.psyrcuit.com",
           fill=TEXT_2, font=url_font, anchor="ma")
 
 img.save("og.png", "PNG", optimize=True)
 print(f"og.png written — {W}x{H}")
+
+# ── apple-touch-icon (180x180, dark bg + centered logo) ──
+ATI = 180
+ati = Image.new("RGB", (ATI, ATI), BG)
+logo_ati = render_logo(int(ATI * 0.78))
+ati_rgba = ati.convert("RGBA")
+off = (ATI - logo_ati.width) // 2
+ati_rgba.alpha_composite(logo_ati, (off, off))
+ati_rgba.convert("RGB").save("apple-touch-icon.png", "PNG", optimize=True)
+print(f"apple-touch-icon.png written — {ATI}x{ATI}")
