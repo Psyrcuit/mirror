@@ -373,9 +373,110 @@ button {
 
 .result-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   margin-top: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+.result-actions .btn {
+  flex: 1;
+  padding: 12px 12px;
+  min-width: 0;
+  white-space: nowrap;
+  justify-content: center;
+}
+@media (max-width: 380px) {
+  .result-actions .btn { padding: 11px 6px; font-size: 13px; }
+}
+
+/* ─── SHARE-CARD RENDER (offscreen, 1080x1080) ─── */
+.share-render {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 1080px;
+  height: 1080px;
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(139,92,246,0.14), transparent 60%),
+    #0a0a0c;
+  display: flex;
+  flex-direction: column;
+  padding: 72px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #e8e8ee;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.share-render .sr-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #14141a 0%, #0e0e14 100%);
+  border: 1px solid #22222a;
+  border-radius: 28px;
+  padding: 48px 44px;
+  position: relative;
+  overflow: hidden;
+}
+.share-render .sr-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #8b5cf6 50%, transparent);
+  opacity: 0.7;
+}
+.share-render .sr-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 22px; border-bottom: 1px solid #22222a;
+  margin-bottom: 26px;
+}
+.share-render .sr-brand { display: flex; align-items: center; gap: 14px; }
+.share-render .sr-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139,92,246,0.55);
+}
+.share-render .sr-name { font-weight: 600; font-size: 24px; letter-spacing: -0.01em; }
+.share-render .sr-id {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 16px; color: #5e5e72; letter-spacing: 0.06em;
+}
+.share-render .sr-traits {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 30px;
+}
+.share-render .sr-trait {
+  background: rgba(139,92,246,0.12);
+  border: 1px solid rgba(139,92,246,0.3);
+  color: #a78bfa;
+  padding: 12px 22px; border-radius: 999px;
+  font-size: 22px; font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.share-render .sr-synthesis {
+  font-size: 30px; line-height: 1.5; color: #e8e8ee;
+  flex: 1;
+  margin-bottom: 28px;
+  display: flex; align-items: center;
+}
+.share-render .sr-vibe-block {
+  display: flex; align-items: baseline; gap: 18px;
+  padding-top: 24px; border-top: 1px solid #22222a;
+  margin-bottom: 24px;
+}
+.share-render .sr-vibe-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 14px; color: #5e5e72; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.share-render .sr-vibe {
+  font-size: 26px; font-style: italic; color: #a78bfa; line-height: 1.4;
+}
+.share-render .sr-footer {
+  display: flex; justify-content: space-between;
+  padding-top: 22px; border-top: 1px solid #22222a;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 16px; color: #5e5e72; letter-spacing: 0.05em;
 }
 .share-status {
   margin-top: 10px;
@@ -556,8 +657,8 @@ button {
 
     <div class="result-actions">
       <button class="btn btn-primary" id="shareBtn">Share</button>
-      <button class="btn btn-ghost" id="exportBtn">Save as PNG</button>
-      <button class="btn btn-ghost" id="newBtn">Try another photo</button>
+      <button class="btn btn-ghost" id="exportBtn">Save PNG</button>
+      <button class="btn btn-ghost" id="newBtn">New photo</button>
     </div>
     <div class="share-status" id="shareStatus" aria-live="polite"></div>
   </div>
@@ -825,32 +926,62 @@ button {
     result.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ── PNG render (square) ──
+  // ── PNG render (dedicated 1080x1080 share card that fills the square) ──
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
   async function renderSquarePNG() {
     if (typeof html2canvas !== 'function') {
       throw new Error('Export library failed to load. Try refreshing.');
     }
-    const cardCanvas = await html2canvas(resultCard, {
-      backgroundColor: null,
-      scale: 2,
-      logging: false,
-      useCORS: true,
-    });
-    const padding = 80 * 2;
-    const size = Math.max(cardCanvas.width, cardCanvas.height) + padding;
-    const sq = document.createElement('canvas');
-    sq.width = size;
-    sq.height = size;
-    const ctx = sq.getContext('2d');
-    ctx.fillStyle = '#0a0a0c';
-    ctx.fillRect(0, 0, size, size);
-    const grad = ctx.createRadialGradient(size / 2, size * 0.15, 0, size / 2, size * 0.15, size * 0.7);
-    grad.addColorStop(0, 'rgba(139, 92, 246, 0.12)');
-    grad.addColorStop(1, 'rgba(139, 92, 246, 0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-    ctx.drawImage(cardCanvas, (size - cardCanvas.width) / 2, (size - cardCanvas.height) / 2);
-    return sq;
+    const traits = Array.from(traitsEl.querySelectorAll('.trait')).map((t) => t.textContent || '');
+    const synthesis = synthesisEl.textContent || '';
+    const vibe = vibeEl.textContent || '';
+    const id = cardId.textContent || '';
+    const date = cardDate.textContent || '';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'share-render';
+    wrapper.innerHTML = `
+      <div class="sr-card">
+        <div class="sr-header">
+          <div class="sr-brand">
+            <div class="sr-dot"></div>
+            <div class="sr-name">Mirror reading</div>
+          </div>
+          <div class="sr-id">${escapeHtml(id)}</div>
+        </div>
+        <div class="sr-traits">${traits.map((t) => `<span class="sr-trait">${escapeHtml(t)}</span>`).join('')}</div>
+        <div class="sr-synthesis">${escapeHtml(synthesis)}</div>
+        <div class="sr-vibe-block">
+          <div class="sr-vibe-label">VIBE</div>
+          <div class="sr-vibe">${escapeHtml(vibe)}</div>
+        </div>
+        <div class="sr-footer">
+          <span>mirror.psyrcuit.com</span>
+          <span>${escapeHtml(date)}</span>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(wrapper);
+    try {
+      const canvas = await html2canvas(wrapper, {
+        backgroundColor: '#0a0a0c',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        width: 1080,
+        height: 1080,
+        windowWidth: 1080,
+        windowHeight: 1080,
+      });
+      return canvas;
+    } finally {
+      wrapper.remove();
+    }
   }
 
   function setShareStatus(msg) {
@@ -859,16 +990,45 @@ button {
     if (msg) setTimeout(() => { if (shareStatus.textContent === msg) setShareStatus(''); }, 4000);
   }
 
+  // Save / download a PNG blob in a way that works on iOS (Web Share fallback)
+  // and desktop (blob-URL <a download>). Avoids huge data: URLs which iOS Safari
+  // refuses to download and surfaces as a "connection error".
+  async function saveBlobAsPNG(blob) {
+    const file = new File([blob], 'mirror-reading.png', { type: 'image/png' });
+
+    // iOS / mobile: Web Share API with files exposes "Save Image" / "Save to Files".
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return true;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return false;
+        // fall through to blob-URL fallback
+      }
+    }
+
+    // Desktop / fallback: blob URL with download attribute
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = 'mirror-reading.png';
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return true;
+  }
+
   exportBtn.addEventListener('click', async () => {
     exportBtn.disabled = true;
     const originalText = exportBtn.textContent;
     exportBtn.textContent = 'Rendering…';
     try {
       const sq = await renderSquarePNG();
-      const link = document.createElement('a');
-      link.download = 'mirror-reading.png';
-      link.href = sq.toDataURL('image/png');
-      link.click();
+      const blob = await new Promise((resolve) => sq.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Could not generate PNG.');
+      await saveBlobAsPNG(blob);
     } catch (err) {
       showError(err.message || 'Could not generate PNG. Screenshot the card manually.');
     } finally {
@@ -888,7 +1048,6 @@ button {
   const shareModalGrid = document.getElementById('shareModalGrid');
 
   let cachedShareBlob = null;
-  let cachedShareDataUrl = null;
 
   function openShareModal() {
     const nativeBtn = shareModalGrid.querySelector('[data-share="native"]');
@@ -903,12 +1062,9 @@ button {
     if (e.key === 'Escape' && !shareModal.hidden) closeShareModal();
   });
 
-  function downloadCachedPNG() {
-    if (!cachedShareDataUrl) return;
-    const link = document.createElement('a');
-    link.download = 'mirror-reading.png';
-    link.href = cachedShareDataUrl;
-    link.click();
+  async function downloadCachedPNG() {
+    if (!cachedShareBlob) return false;
+    return saveBlobAsPNG(cachedShareBlob);
   }
 
   function openIntent(url) {
@@ -922,7 +1078,6 @@ button {
     try {
       const sq = await renderSquarePNG();
       cachedShareBlob = await new Promise((resolve) => sq.toBlob(resolve, 'image/png'));
-      cachedShareDataUrl = sq.toDataURL('image/png');
       if (!cachedShareBlob) throw new Error('Could not generate share image.');
       openShareModal();
     } catch (err) {
@@ -953,37 +1108,37 @@ button {
           break;
         }
         case 'x':
-          downloadCachedPNG();
+          await downloadCachedPNG();
           openIntent(`https://twitter.com/intent/tweet?text=${enc(SHARE_TEXT)}&url=${enc(SHARE_URL)}`);
           setShareStatus('PNG saved — attach it in the post.');
           closeShareModal();
           break;
         case 'bluesky':
-          downloadCachedPNG();
+          await downloadCachedPNG();
           openIntent(`https://bsky.app/intent/compose?text=${enc(SHARE_TEXT + ' ' + SHARE_URL)}`);
           setShareStatus('PNG saved — attach it in the post.');
           closeShareModal();
           break;
         case 'threads':
-          downloadCachedPNG();
+          await downloadCachedPNG();
           openIntent(`https://www.threads.net/intent/post?text=${enc(SHARE_TEXT + ' ' + SHARE_URL)}`);
           setShareStatus('PNG saved — attach it in the post.');
           closeShareModal();
           break;
         case 'linkedin':
-          downloadCachedPNG();
+          await downloadCachedPNG();
           openIntent(`https://www.linkedin.com/sharing/share-offsite/?url=${enc(SHARE_URL)}`);
           setShareStatus('PNG saved — attach it in the post.');
           closeShareModal();
           break;
         case 'reddit':
-          downloadCachedPNG();
+          await downloadCachedPNG();
           openIntent(`https://www.reddit.com/submit?url=${enc(SHARE_URL)}&title=${enc(SHARE_TITLE)}`);
           setShareStatus('PNG saved — attach it in the post.');
           closeShareModal();
           break;
         case 'facebook':
-          downloadCachedPNG();
+          await downloadCachedPNG();
           openIntent(`https://www.facebook.com/sharer/sharer.php?u=${enc(SHARE_URL)}`);
           setShareStatus('PNG saved — attach it in the post.');
           closeShareModal();
@@ -1002,7 +1157,7 @@ button {
           closeShareModal();
           break;
         case 'download':
-          downloadCachedPNG();
+          await downloadCachedPNG();
           setShareStatus('PNG saved.');
           closeShareModal();
           break;
