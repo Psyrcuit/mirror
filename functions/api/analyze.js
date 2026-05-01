@@ -2,7 +2,7 @@
 // Direct fetch to Anthropic + OpenAI (no SDKs) to keep the Pages Function
 // bundle small and the runtime surface predictable.
 
-const DAILY_CAP = 40;
+const DAILY_CAP = 100;
 const PER_IP_HOURLY_CAP = 5;
 const MAX_BODY_BYTES = 2 * 1024 * 1024; // 2MB
 const REQUEST_TIMEOUT_MS = 30_000;
