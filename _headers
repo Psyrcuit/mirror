@@ -1,0 +1,33 @@
+# Cloudflare Pages headers config.
+# Lock Content-Type on the OG assets and disable transforms so that
+# Cloudflare's Polish/Mirage/auto-minify pipeline can't recompress the
+# images into something Facebook's scraper rejects as "Corrupted Image".
+
+/og.jpg
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=86400, immutable
+  X-Content-Type-Options: nosniff
+  Cross-Origin-Resource-Policy: cross-origin
+  Access-Control-Allow-Origin: *
+
+/og.png
+  Content-Type: image/png
+  Cache-Control: public, max-age=86400, immutable
+  X-Content-Type-Options: nosniff
+  Cross-Origin-Resource-Policy: cross-origin
+  Access-Control-Allow-Origin: *
+
+/og-square.png
+  Content-Type: image/png
+  Cache-Control: public, max-age=86400, immutable
+  X-Content-Type-Options: nosniff
+  Cross-Origin-Resource-Policy: cross-origin
+  Access-Control-Allow-Origin: *
+
+/apple-touch-icon.png
+  Content-Type: image/png
+  Cache-Control: public, max-age=604800
+
+/favicon.svg
+  Content-Type: image/svg+xml
+  Cache-Control: public, max-age=604800

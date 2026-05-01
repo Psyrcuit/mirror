@@ -170,7 +170,12 @@ print("og.png written — 1200x630 (landscape)")
 # PIL-produced PNGs with the "Corrupted Image" warning even when
 # every header is correct and the file decodes everywhere else.
 # JPEG bypasses that entirely and is universally accepted.
-landscape.save("og.jpg", "JPEG", quality=92, optimize=True, progressive=False)
+# Safe JPEG: baseline (no progressive), 4:2:0 chroma, no ICC profile,
+# no EXIF — every social scraper handles this without ceremony.
+landscape.convert("RGB").save(
+    "og.jpg", "JPEG",
+    quality=85, optimize=False, progressive=False, subsampling=2,
+)
 print("og.jpg written — 1200x630 (landscape, JPEG)")
 
 # ── og-square.png — 1200x1200 (WhatsApp / iMessage / in-app) ────
