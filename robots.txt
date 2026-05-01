@@ -1,0 +1,44 @@
+# Mirror — psyrcuit demo build 1
+# Public site. Social-card scrapers explicitly welcomed.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: facebookcatalog
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: Slackbot-LinkExpanding
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: redditbot
+Allow: /
+
+User-agent: Bluesky-Web-CrawlerBot
+Allow: /
+
+Sitemap: https://mirror.psyrcuit.com/sitemap.xml
