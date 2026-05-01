@@ -166,6 +166,12 @@ landscape = build_canvas(
 )
 landscape.save("og.png", "PNG", optimize=True)
 print("og.png written — 1200x630 (landscape)")
+# Also write JPEG. Facebook's scraper has historically failed on
+# PIL-produced PNGs with the "Corrupted Image" warning even when
+# every header is correct and the file decodes everywhere else.
+# JPEG bypasses that entirely and is universally accepted.
+landscape.save("og.jpg", "JPEG", quality=92, optimize=True, progressive=False)
+print("og.jpg written — 1200x630 (landscape, JPEG)")
 
 # ── og-square.png — 1200x1200 (WhatsApp / iMessage / in-app) ────
 square = build_canvas(
