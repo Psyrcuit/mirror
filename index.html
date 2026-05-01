@@ -400,7 +400,7 @@ button {
     #0a0a0c;
   display: flex;
   flex-direction: column;
-  padding: 72px;
+  padding: 32px;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: #e8e8ee;
   box-sizing: border-box;
@@ -408,12 +408,13 @@ button {
 }
 .share-render .sr-card {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background: linear-gradient(180deg, #14141a 0%, #0e0e14 100%);
   border: 1px solid #22222a;
   border-radius: 28px;
-  padding: 48px 44px;
+  padding: 28px 28px;
   position: relative;
   overflow: hidden;
 }
@@ -425,9 +426,10 @@ button {
   opacity: 0.7;
 }
 .share-render .sr-header {
+  flex: 0 0 auto;
   display: flex; justify-content: space-between; align-items: center;
-  padding-bottom: 22px; border-bottom: 1px solid #22222a;
-  margin-bottom: 26px;
+  padding-bottom: 18px; border-bottom: 1px solid #22222a;
+  margin-bottom: 20px;
 }
 .share-render .sr-brand { display: flex; align-items: center; gap: 14px; }
 .share-render .sr-dot {
@@ -441,8 +443,9 @@ button {
   font-size: 16px; color: #5e5e72; letter-spacing: 0.06em;
 }
 .share-render .sr-traits {
+  flex: 0 0 auto;
   display: flex; flex-wrap: wrap; gap: 12px;
-  margin-bottom: 30px;
+  margin-bottom: 22px;
 }
 .share-render .sr-trait {
   background: rgba(139,92,246,0.12);
@@ -453,15 +456,22 @@ button {
   letter-spacing: -0.005em;
 }
 .share-render .sr-synthesis {
-  font-size: 30px; line-height: 1.5; color: #e8e8ee;
-  flex: 1;
-  margin-bottom: 28px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  margin-bottom: 22px;
   display: flex; align-items: center;
 }
+.share-render .sr-synth-text {
+  width: 100%;
+  color: #e8e8ee;
+  font-size: 30px; line-height: 1.5;
+}
 .share-render .sr-vibe-block {
+  flex: 0 0 auto;
   display: flex; align-items: baseline; gap: 18px;
-  padding-top: 24px; border-top: 1px solid #22222a;
-  margin-bottom: 24px;
+  padding-top: 18px; border-top: 1px solid #22222a;
+  margin-bottom: 18px;
 }
 .share-render .sr-vibe-label {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -473,8 +483,9 @@ button {
   font-size: 26px; font-style: italic; color: #a78bfa; line-height: 1.4;
 }
 .share-render .sr-footer {
+  flex: 0 0 auto;
   display: flex; justify-content: space-between;
-  padding-top: 22px; border-top: 1px solid #22222a;
+  padding-top: 18px; border-top: 1px solid #22222a;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 16px; color: #5e5e72; letter-spacing: 0.05em;
 }
@@ -955,7 +966,7 @@ button {
           <div class="sr-id">${escapeHtml(id)}</div>
         </div>
         <div class="sr-traits">${traits.map((t) => `<span class="sr-trait">${escapeHtml(t)}</span>`).join('')}</div>
-        <div class="sr-synthesis">${escapeHtml(synthesis)}</div>
+        <div class="sr-synthesis"><div class="sr-synth-text">${escapeHtml(synthesis)}</div></div>
         <div class="sr-vibe-block">
           <div class="sr-vibe-label">VIBE</div>
           <div class="sr-vibe">${escapeHtml(vibe)}</div>
@@ -968,6 +979,20 @@ button {
     `;
     document.body.appendChild(wrapper);
     try {
+      // Fit synthesis text into whatever vertical space is left between the
+      // pinned top (header + traits) and pinned bottom (vibe + footer). Shrink
+      // font-size in 1px steps until it stops overflowing.
+      const synthBox = wrapper.querySelector('.sr-synthesis');
+      const synthText = wrapper.querySelector('.sr-synth-text');
+      let size = 32;
+      synthText.style.fontSize = size + 'px';
+      while (synthText.offsetHeight > synthBox.clientHeight && size > 14) {
+        size -= 1;
+        synthText.style.fontSize = size + 'px';
+      }
+      // Match line-height tightening as the font shrinks for legibility
+      synthText.style.lineHeight = size >= 24 ? '1.5' : '1.45';
+
       const canvas = await html2canvas(wrapper, {
         backgroundColor: '#0a0a0c',
         scale: 2,
